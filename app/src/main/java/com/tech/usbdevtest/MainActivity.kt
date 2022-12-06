@@ -57,8 +57,8 @@ class MainActivity : AppCompatActivity() {
             // List all devices connected to USB host on startup
             printStatus(getString(R.string.status_list))
             //printDeviceList()
-            var msg = model_UsbCr.detectCardreader()
-            printResult(resultView.text.toString() + msg)
+            var usb_ok = model_UsbCr.detectCardreader()
+            printResult(resultView.text.toString() + model_UsbCr.model_Msg)
         }
     }
 
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         model_UsbCr.usbManager = getSystemService(USB_SERVICE) as UsbManager
 
         // 建立 授權推播訊息
-        var filter = model_UsbCr.init(this)
+        var filter = model_UsbCr.initFilter(this)
         registerReceiver(model_UsbCr.usbReceiver, filter)
         printResult("Devices start...\n\n")
         handleIntent(intent)

@@ -5,16 +5,18 @@ import android.content.*
 import android.hardware.usb.*
 import android.util.Log
 import java.text.ParseException
+import java.util.*
 
 class UsbCardreader {
     private val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
     /* USB system service */
-    private lateinit var permissionIntent : PendingIntent
-    public lateinit var usbManager        : UsbManager
-    private val model_CardReader_vendorid : Int = 3238
-    private val model_CardReader_productid: Int = 16
-    private lateinit var model_epOut      : UsbEndpoint
-    private lateinit var model_epIn       : UsbEndpoint
+    private lateinit var    permissionIntent            : PendingIntent
+    private val             model_CardReader_vendorid   : Int = 3238
+    private val             model_CardReader_productid  : Int = 16
+    private lateinit var    model_epOut                 : UsbEndpoint
+    private lateinit var    model_epIn                  : UsbEndpoint
+    public  lateinit var    usbManager                  : UsbManager
+    public  lateinit var    model_Msg                   : String
 
     private fun convertByteToHexadecimal(byteArray: ByteArray): String
     {
@@ -22,7 +24,7 @@ class UsbCardreader {
 
         // Iterating through each byte in the array
         for (i in byteArray) {
-            hex += String.format("%02X", i)
+            hex += String.format(" %02X", i)
         }
         return hex;
     }
@@ -93,6 +95,7 @@ class UsbCardreader {
             // 2. 接收Reader回傳資料
             var Receiveytes = ByteArray(0xFF)
             var ret_code = connection.bulkTransfer(model_epIn, Receiveytes, Receiveytes.size, 10000)
+            Receiveytes = Arrays.copyOfRange(Receiveytes,0, ret_code);
             Log.d(ContentValues.TAG, "Was response from read successful? $ret_code\n")
             ret += "Was response from read ret_code: $ret_code\n"
             ret += "Receiveytes size : " + Receiveytes.size + "\n"
@@ -143,8 +146,10 @@ class UsbCardreader {
     /**
      * prepare for receiver to handle USB disconnect events.
      */
-    public fun init(context: Context): IntentFilter
+    public fun initFilter(context: Context): IntentFilter
     {
+        model_Msg = String()
+
         // 建立 授權推播訊息
         permissionIntent = PendingIntent.getBroadcast(
             context, 0, Intent(
@@ -156,11 +161,12 @@ class UsbCardreader {
     /**
      * detect USB plug in/out events.
      */
-    public fun detectCardreader(): String {
+    public fun detectCardreader(): Boolean {
         val connectedDevices = usbManager.deviceList
+        var fRet = false
 
         if (connectedDevices.isEmpty()) {
-            return "No Devices Currently Connected\n"
+            model_Msg = "No Devices Currently Connected\n"
         } else {
             val builder = buildString {
                 append("Connected Device Count: ")
@@ -188,9 +194,11 @@ class UsbCardreader {
                     if (connection != null) {
                         Log.d(ContentValues.TAG, "讀卡機 已連線")
                         append("get :" + device.deviceId +" connection ok\n")
+                        fRet = true
                     } else {
                         Log.d(ContentValues.TAG, "讀卡機 沒連線")
                         append("(X) get :" + device.deviceId +" connection failure\n")
+                        fRet = false
                     }
                     //printDeviceDetails(device, connectedDevices)
                     /*
@@ -219,8 +227,9 @@ class UsbCardreader {
                     }
                 }
             }
-            return builder
+            model_Msg = builder
         }
+        return fRet
     }
 
     /**
