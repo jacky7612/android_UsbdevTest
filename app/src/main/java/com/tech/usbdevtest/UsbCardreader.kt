@@ -89,8 +89,8 @@ class UsbCardreader {
                 ret += "response ok; buffer size : " + buffer.size + "\n"
             }
             var hex = convertByteToHexadecimal(buffer)
-            Log.d(ContentValues.TAG, "Hex: $hex")
-            ret += "Hex: " + hex + "\n"
+            Log.d(ContentValues.TAG, "request Hex: $hex")
+            ret += "*                     Hex: " + hex + "\n"
 
             // 2. 接收Reader回傳資料
             var Receiveytes = ByteArray(0xFF)
@@ -101,8 +101,8 @@ class UsbCardreader {
             ret += "Receiveytes size : " + Receiveytes.size + "\n"
 
             hex = convertByteToHexadecimal(Receiveytes)
-            Log.d(ContentValues.TAG, "Hex: $hex")
-            ret += "Hex: " + hex + "\n"
+            Log.d(ContentValues.TAG, "response Hex: $hex")
+            ret += "* response Hex: " + hex + "\n"
             ////connection.close()
             //ret += "close device connection"
         } catch (e: IllegalArgumentException) {
