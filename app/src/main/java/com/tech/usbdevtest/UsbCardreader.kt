@@ -95,7 +95,7 @@ class UsbCardreader {
             // 2. 接收Reader回傳資料
             var Receiveytes = ByteArray(0xFF)
             var ret_code = connection.bulkTransfer(model_epIn, Receiveytes, Receiveytes.size, 10000)
-            Receiveytes = Arrays.copyOfRange(Receiveytes,0, ret_code);
+            Receiveytes = Arrays.copyOfRange(Receiveytes,0, ret_code)
             Log.d(ContentValues.TAG, "Was response from read successful? $ret_code\n")
             ret += "\nWas response from read ret_code: $ret_code\n"
             ret += "Receiveytes size : " + Receiveytes.size + "\n"
