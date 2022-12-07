@@ -72,12 +72,12 @@ class MainActivity : AppCompatActivity() {
         // 取得 USB Manager
         // 取得 USB 裝置清單
         model_UsbCr = UsbCardreader()
-        model_UsbCr.usbManager = getSystemService(USB_SERVICE) as UsbManager
+        model_UsbCr.usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
 
         // 建立 授權推播訊息
         var filter = model_UsbCr.initFilter(this)
         registerReceiver(model_UsbCr.usbReceiver, filter)
-        printResult("Devices start...\n\n")
+        printResult("App start...\n\n")
         handleIntent(intent)
     }
 
