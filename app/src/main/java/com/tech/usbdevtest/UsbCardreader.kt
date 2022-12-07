@@ -17,8 +17,16 @@ class UsbCardreader {
     private val             model_CardReader_productid  : Int = 16
     private lateinit var    model_epOut                 : UsbEndpoint
     private lateinit var    model_epIn                  : UsbEndpoint
-    public  lateinit var    usbManager                  : UsbManager
+    public  lateinit var    model_usbManager            : UsbManager
+    public  lateinit var    model_Device                : UsbDevice
     public  lateinit var    model_Msg                   : String
+    public  lateinit var    model_DeviceConnection      : UsbDeviceConnection
+
+    public  lateinit var    model_Receiveytes: ByteArray//接收資料
+
+    // sample variant
+    private val slot=0
+    private var sequence=0
 
     private fun convertByteToHexadecimal(byteArray: ByteArray): String
     {
@@ -74,7 +82,7 @@ class UsbCardreader {
         else
         {
             ret += "device :" + device.deviceId +" do Permission procedure!"
-            usbManager.requestPermission(device, permissionIntent)
+            model_usbManager.requestPermission(device, permissionIntent)
         }
         return tracelog(ret);
     }
@@ -95,14 +103,14 @@ class UsbCardreader {
             ret += tracelog("*                     Hex: " + hex + "\n")
 
             // 2. 接收Reader回傳資料
-            var Receiveytes = ByteArray(0xFF)
-            var ret_code = connection.bulkTransfer(model_epIn, Receiveytes, Receiveytes.size, 10000)
-            Receiveytes = Arrays.copyOfRange(Receiveytes,0, ret_code)
+            model_Receiveytes = ByteArray(0xFF)
+            var ret_code = connection.bulkTransfer(model_epIn, model_Receiveytes, model_Receiveytes.size, 10000)
+            model_Receiveytes = Arrays.copyOfRange(model_Receiveytes,0, ret_code)
             Log.d(ContentValues.TAG, "Was response from read successful? $ret_code\n")
             ret += "\n" + tracelog(" Was response from read ret_code: $ret_code\n")
-            ret += tracelog("Receiveytes size : " + Receiveytes.size + "\n")
+            ret += tracelog("Receiveytes size : " + model_Receiveytes.size + "\n")
 
-            hex = convertByteToHexadecimal(Receiveytes)
+            hex = convertByteToHexadecimal(model_Receiveytes)
             Log.d(ContentValues.TAG, "response Hex: $hex")
             ret += tracelog("* response Hex: " + hex + "\n")
             ////connection.close()
@@ -152,11 +160,8 @@ class UsbCardreader {
         permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION),0)
         return IntentFilter(ACTION_USB_PERMISSION)
     }
-    /**
-     * detect USB plug in/out events.
-     */
-    public fun detectCardreader(): Boolean {
-        val deviceList = usbManager.getDeviceList()
+    public fun initCardreader(): Boolean {
+        val deviceList = model_usbManager.getDeviceList()
         var fRet             = false
 
         model_Msg += "* Detect card reader Entry <<<\n\n"
@@ -178,11 +183,73 @@ class UsbCardreader {
                         if (device.vendorId != model_CardReader_vendorid || device.productId != model_CardReader_productid) continue;
                         append(tracelog("deviceId :" + device.deviceId.toString() + "\n") + tracelog("vendorId :" + device.vendorId.toString() + "\n") + tracelog("deviceName" + device.deviceName.toString() + "\n"))
 
-                        var hasPermision = usbManager.hasPermission(device)
+                        var hasPermision = model_usbManager.hasPermission(device)
                         append(checkPermission(device, hasPermision, permissionIntent))
                         append(checkPermission(device, hasPermision, permissionIntent))
+                        hasPermision = model_usbManager.hasPermission(device)
+                        if (hasPermision) model_Device = device // 取得讀卡機 usb device
 
-                        var connection = usbManager.openDevice(device) as UsbDeviceConnection
+                        var connection = model_usbManager.openDevice(device) as UsbDeviceConnection
+                        if (connection != null) {
+                            Log.d(ContentValues.TAG, "讀卡機 已連線")
+                            append(tracelog("get :" + device.deviceId + " connection ok\n"))
+                            fRet=true
+                        } else {
+                            Log.d(ContentValues.TAG, "讀卡機 沒連線")
+                            append(tracelog("(X) get :" + device.deviceId + " connection failure\n"))
+                            fRet=false
+                        }
+                        model_DeviceConnection = connection
+
+                        var devIface: UsbInterface = device.getInterface(device.interfaceCount - 1)
+                        append(tracelog("devIface ok\n"))
+
+                        var msg = getEndpoint(connection, devIface)
+                        append(msg)
+                    }
+                }
+                model_Msg += builder
+            }
+        } catch (e: IllegalArgumentException) {
+            model_Msg += tracelog("Exception error :") + e.message
+        } finally {
+            model_Msg += "\n*Detect card reader Exit >>>\n"
+        }
+        return fRet
+    }
+    /**
+     * detect USB plug in/out events.
+     */
+    public fun detectCardreader(): Boolean {
+        val deviceList = model_usbManager.getDeviceList()
+        var fRet             = false
+
+        model_Msg += "* Detect card reader Entry <<<\n\n"
+        try {
+            if (deviceList.isNullOrEmpty()) {
+                model_Msg += tracelog("No Devices Currently Connected\n")
+            } else {
+                val builder = buildString {
+                    append(tracelog("Connected Device Count: " + deviceList.size + "\n"))
+
+                    var device: UsbDevice
+                    for (dev in deviceList) {
+                        device = dev.value
+                        //Use the last device detected (if multiple) to open
+                        if (device == null) {
+                            append(tracelog("device == null\n"))
+                            continue
+                        }
+                        if (device.vendorId != model_CardReader_vendorid || device.productId != model_CardReader_productid) continue;
+                        append(tracelog("deviceId :" + device.deviceId.toString() + "\n") + tracelog("vendorId :" + device.vendorId.toString() + "\n") + tracelog("deviceName" + device.deviceName.toString() + "\n"))
+
+                        var hasPermision = model_usbManager.hasPermission(device)
+                        append(checkPermission(device, hasPermision, permissionIntent))
+                        append(checkPermission(device, hasPermision, permissionIntent))
+                        hasPermision = model_usbManager.hasPermission(device)
+                        if (hasPermision) model_Device = device // 取得讀卡機 usb device
+
+                        var connection = model_usbManager.openDevice(device) as UsbDeviceConnection
                         if (connection != null) {
                             Log.d(ContentValues.TAG, "讀卡機 已連線")
                             append(tracelog("get :" + device.deviceId + " connection ok\n"))
@@ -203,31 +270,31 @@ class UsbCardreader {
                         Kl : key length
                         K : key
                         */
-                        var Rt: Int = 0x00
-                        var Ri: Int = 0xFF
-                        var buffer = byteArrayOf(
-                            0xFF.toByte(),
-                            0x82.toByte(),
-                            0x00.toByte(),
-                            0x00.toByte(),
-                            0x06.toByte(),
-                            0xFF.toByte(),
-                            0xFF.toByte(),
-                            0xFF.toByte(),
-                            0xFF.toByte(),
-                            0xFF.toByte(),
-                            0xFF.toByte()
-                        )
+                        //var Rt: Int = 0x00
+                        //var Ri: Int = 0xFF
+                        //var buffer = byteArrayOf(
+                        //    0xFF.toByte(),
+                        //    0x82.toByte(),
+                        //    0x00.toByte(),
+                        //    0x00.toByte(),
+                        //    0x06.toByte(),
+                        //    0xFF.toByte(),
+                        //    0xFF.toByte(),
+                        //    0xFF.toByte(),
+                        //    0xFF.toByte(),
+                        //    0xFF.toByte(),
+                        //    0xFF.toByte()
+                        //)
                         var devIface: UsbInterface = device.getInterface(device.interfaceCount - 1)
                         append(tracelog("devIface ok\n"))
 
                         var msg = getEndpoint(connection, devIface)
                         append(msg)
 
-                        if (connection != null) {
-                            msg = write2usb(connection, buffer)
-                            append(msg)
-                        }
+                        //if (connection != null) {
+                        //    msg = write2usb(connection, buffer)
+                        //    append(msg)
+                        //}
                     }
                 }
                 model_Msg += builder
@@ -247,7 +314,7 @@ class UsbCardreader {
      * @param device USB device to query.
      */
     public fun printDeviceDetails(device: UsbDevice): String {
-        val connection = usbManager.openDevice(device)
+        val connection = model_usbManager.openDevice(device)
         var msg = String()
 
         for (describe in connection.rawDescriptors)
@@ -273,5 +340,87 @@ class UsbCardreader {
         }
 
         return msg + "\n"
+    }
+
+    public fun cmdPowerON(): String {
+        var msg = ""
+        val PowerOnCmd=byteArrayOf(
+            0x62.toByte(),
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            slot.toByte(),
+            sequence.toByte(),
+            0x00,
+            0x00,
+            0x00
+        )
+        if (model_DeviceConnection == null) {
+            return "No Reader Found !"
+        }
+        //-------------------------
+        msg = write2usb(model_DeviceConnection, PowerOnCmd)
+
+        // 2. 接收Reader回傳資料
+
+            //回傳資料
+            sequence=(sequence + 1) % 0xFF
+            if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x00) {
+                val bATR=ByteArray(model_Receiveytes.get(4) - 1)
+                msg += tracelog("ART " + (model_Receiveytes.get(4) - 1).toString() + " bytes :")
+                System.arraycopy(model_Receiveytes, 11, bATR, 0, model_Receiveytes.get(4) - 1)
+                msg += tracelog("$bATR, $bATR.size")
+                if (bATR[0] != 0x3B.toByte() && bATR[0] != 0x3F.toByte()) {
+                    msg += tracelog("It's memory card , don't send APDU !\n")
+                }
+            } else if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x42)
+                msg += tracelog("No Card !\n")
+            else if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x41)
+                msg += tracelog("Connect Card Fail !\n")
+            else
+                msg += tracelog("Connect Card Fail2 !\n")
+
+        return msg
+    }
+
+    public fun cmdPowerOFF(): String {
+        var ret=-100
+        var msg = ""
+        val PowerOffCmd=byteArrayOf(
+            0x63.toByte(),
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+            slot.toByte(),
+            sequence.toByte(),
+            0x00,
+            0x00,
+            0x00
+        )
+        if (model_DeviceConnection == null) {
+            return "No Reader Found !"
+        }
+        //-------------------------
+        msg = write2usb(model_DeviceConnection, PowerOffCmd)
+        //-------------------------
+
+        // 2. 接收Reader回傳資料
+
+
+            //回傳資料
+            sequence=(sequence + 1) % 0xFF
+
+            //-------------------------
+            if (model_Receiveytes.get(0) == 0x81.toByte() && model_Receiveytes.get(7).toInt() == 0x01) {
+                msg += tracelog("Disconnect Card OK !")
+            }
+            else if (model_Receiveytes.get(0) == 0x81.toByte() && model_Receiveytes.get(7).toInt() == 0x02)
+                msg += tracelog("No Card !")
+            else
+                msg += tracelog("Disconnect Card Fail2 !")
+            //-------------------------
+        return msg
     }
 }

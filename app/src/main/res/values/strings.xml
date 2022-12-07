@@ -3,4 +3,5 @@
     <string name="status_added">新增裝置</string>
     <string name="status_removed">移除裝置</string>
     <string name="status_list">狀態清單</string>
+    <string name="btsend">Read Card</string>
 </resources>
