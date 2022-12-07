@@ -38,7 +38,7 @@
             android:layout_height="0dip"
             android:layout_weight="10"
             android:layout_marginBottom="0dp"
-            android:gravity="bottom"
+            android:gravity="top"
             android:scrollbars="vertical" />
     </LinearLayout>
 

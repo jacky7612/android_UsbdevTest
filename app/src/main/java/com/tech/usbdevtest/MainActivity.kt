@@ -138,18 +138,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun btnReadCard_Click(view: View) {
-        try {
-            //val GetHealthIDCardCmd1=byteArrayOf(
-            //    0x00, 0xA4.toByte(), 0x04, 0x00, 0x10.toByte(), 0xD1.toByte(), 0x58, 0x00, 0x00,
-            //    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00
-            //)
-            //val GetHealthIDCardCmd2=byteArrayOf(0x00, 0xCA.toByte(), 0x11, 0x00, 0x02, 0x00, 0x00)
-            clear_info()
+        var msg = ""
 
+        try {
+            //clear_info()
             resultView.text = ""
-            printResult(model_UsbCr.cmdPowerON())
-            printResult(model_UsbCr.cmdPowerOFF())
+            if (model_UsbCr.model_initCardreader_Succeed == false) {
+                msg+=model_UsbCr.tracelog("EZ110PX Card Reader is null\n")
+                return
+            }
+            msg+=model_UsbCr.tracelog(model_UsbCr.detectCardreader())
+            if (model_UsbCr.model_Plugin == true)
+                msg+=model_UsbCr.tracelog(model_UsbCr.readHealthCardData())
         } catch (e: IllegalArgumentException) {
+            msg+=model_UsbCr.tracelog("btnReadCard :$e\n")
+        } finally {
+            if (model_UsbCr.model_Plugin)
+                msg+=model_UsbCr.tracelog("plugin = true\n")
+            else
+                msg+=model_UsbCr.tracelog("plugin = false\n")
+            printResult(msg)
         }
     }
 }
