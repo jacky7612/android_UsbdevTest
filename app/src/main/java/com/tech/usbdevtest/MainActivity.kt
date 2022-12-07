@@ -1,11 +1,8 @@
 package com.tech.usbdevtest
 
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
+import android.content.*
 import android.content.ContentValues.TAG
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.hardware.usb.*
 import android.os.Bundle
 import android.os.IBinder
@@ -52,16 +49,18 @@ class MainActivity : AppCompatActivity() {
         val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
         if (device != null) {
             printStatus(getString(R.string.status_added))
-            model_UsbCr.printDeviceDetails(device)
-        } else {
+            printResult(model_UsbCr.printDeviceDetails(device))
+        }
+        try {
             // List all devices connected to USB host on startup
             printStatus(getString(R.string.status_list))
-            //printDeviceList()
-            var usb_ok = model_UsbCr.detectCardreader()
+            var usb_ok=model_UsbCr.detectCardreader()
             printResult(resultView.text.toString() + model_UsbCr.model_Msg)
+        } catch (e: IllegalArgumentException) {
+            printResult("Invalid Exception error :$e")
         }
     }
-
+    //private var ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

@@ -12,7 +12,7 @@ class UsbCardreader {
     private val TAB_STR                 = "\t\t"
     private val TAB_ENABLE              = false
     /* USB system service */
-    private lateinit var    permissionIntent            : PendingIntent
+    public  lateinit var    permissionIntent            : PendingIntent
     private val             model_CardReader_vendorid   : Int = 3238
     private val             model_CardReader_productid  : Int = 16
     private lateinit var    model_epOut                 : UsbEndpoint
@@ -142,7 +142,6 @@ class UsbCardreader {
             }
         }
     }
-
     /**
      * prepare for receiver to handle USB disconnect events.
      */
@@ -157,20 +156,20 @@ class UsbCardreader {
      * detect USB plug in/out events.
      */
     public fun detectCardreader(): Boolean {
-        val connectedDevices = usbManager.deviceList
+        val deviceList = usbManager.getDeviceList()
         var fRet             = false
 
         model_Msg += "* Detect card reader Entry <<<\n\n"
         try {
-            if (connectedDevices.isEmpty()) {
+            if (deviceList.isNullOrEmpty()) {
                 model_Msg += tracelog("No Devices Currently Connected\n")
             } else {
                 val builder = buildString {
-                    append(tracelog("Connected Device Count: " + connectedDevices.size + "\n"))
+                    append(tracelog("Connected Device Count: " + deviceList.size + "\n"))
 
-                    for (dev in connectedDevices.values) {
-                        var device: UsbDevice
-                        device=dev
+                    var device: UsbDevice
+                    for (dev in deviceList) {
+                        device = dev.value
                         //Use the last device detected (if multiple) to open
                         if (device == null) {
                             append(tracelog("device == null\n"))
@@ -183,7 +182,7 @@ class UsbCardreader {
                         append(checkPermission(device, hasPermision, permissionIntent))
                         append(checkPermission(device, hasPermision, permissionIntent))
 
-                        var connection=usbManager.openDevice(device) as UsbDeviceConnection
+                        var connection = usbManager.openDevice(device) as UsbDeviceConnection
                         if (connection != null) {
                             Log.d(ContentValues.TAG, "讀卡機 已連線")
                             append(tracelog("get :" + device.deviceId + " connection ok\n"))
@@ -249,10 +248,14 @@ class UsbCardreader {
      */
     public fun printDeviceDetails(device: UsbDevice): String {
         val connection = usbManager.openDevice(device)
+        var msg = String()
+
+        for (describe in connection.rawDescriptors)
+            msg += describe.toString()
 
         val deviceDescriptor = try {
             //Parse the raw device descriptor
-            connection.rawDescriptors
+            connection.rawDescriptors.toString()
         } catch (e: IllegalArgumentException) {
             Log.w(ContentValues.TAG, "Invalid device descriptor", e)
             null
@@ -260,8 +263,7 @@ class UsbCardreader {
 
         val configDescriptor = try {
             //Parse the raw configuration descriptor
-            connection.rawDescriptors
-            //accessDevice(device, connection)
+            connection.rawDescriptors.toString()
         } catch (e: IllegalArgumentException) {
             Log.w(ContentValues.TAG, "Invalid config descriptor", e)
             null
@@ -270,6 +272,6 @@ class UsbCardreader {
             null
         }
 
-        return "$deviceDescriptor\n\n$configDescriptor"
+        return msg + "\n"
     }
 }
