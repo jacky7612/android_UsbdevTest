@@ -15,8 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
     /* USB class */
     private lateinit var model_UsbCr: UsbCardreader
-    private val MAX_LINES=20
-    private var usb_prepare_succeed: Boolean = false
+    private          val MAX_LINES = 100
+    private          var usb_prepare_succeed: Boolean = false
 
     /* UI elements */
     private lateinit var statusView: TextView
@@ -148,8 +148,14 @@ class MainActivity : AppCompatActivity() {
                 return
             }
             msg+=model_UsbCr.tracelog(model_UsbCr.detectCardreader())
-            if (model_UsbCr.model_Plugin == true)
+            if (model_UsbCr.model_Plugin == true) {
                 msg+=model_UsbCr.tracelog(model_UsbCr.readHealthCardData())
+                cardID.text     = model_UsbCr.model_cardID
+                Name.text       = model_UsbCr.model_Name
+                Identity.text   = model_UsbCr.model_Identity
+                Birthday.text   = model_UsbCr.model_Birthday
+                Sex.text        = model_UsbCr.model_Sex
+            }
         } catch (e: IllegalArgumentException) {
             msg+=model_UsbCr.tracelog("btnReadCard :$e\n")
         } finally {

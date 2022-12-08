@@ -340,7 +340,6 @@ class UsbCardreader {
 
     public fun detectCardreader(): String
     {
-        var ret=-100
         var msg=""
         val GetHealthIDCardCmd1=byteArrayOf(0x65)
 
@@ -361,10 +360,12 @@ class UsbCardreader {
         System.arraycopy(GetHealthIDCardCmd1, 0, spGetHealthIDCardCmd1, 10, GetHealthIDCardCmd1.size)
         //-------------------------
         msg = access_Usbdevice(model_DeviceConnection, spGetHealthIDCardCmd1)
-        if (ret == 10 && model_Receiveytes.get(7).toInt() == 0x42) {
+        if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x42) {
+            msg+=tracelog("No Card !\n")
             msg += tracelog("沒有插卡!\n")
             model_Plugin = false
         } else {
+            msg+=tracelog("Card Exists!\n")
             msg += tracelog("偵測到卡!\n")
             model_Plugin = true
         }
@@ -607,12 +608,16 @@ class UsbCardreader {
             if (bATR[0] != 0x3B.toByte() && bATR[0] != 0x3F.toByte()) {
                 msg += tracelog("It's memory card , don't send APDU !\n")
             }
-        } else if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x42)
-            msg += tracelog("No Card !\n")
-        else if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x41)
-            msg += tracelog("Connect Card Fail !\n")
-        else
-            msg += tracelog("Connect Card Fail2 !\n")
+        } else if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x42) {
+            msg+=tracelog("No Card !\n")
+            msg+=tracelog("沒有插卡!\n")
+        } else if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x41) {
+            msg+=tracelog("Connect Card Fail !\n")
+            msg+=tracelog("卡片有問題!\n")
+        } else {
+            msg+=tracelog("Connect Card Fail2 !\n")
+            msg+=tracelog("卡片有問題!\n")
+        }
         //-------------------------
 
         return msg
