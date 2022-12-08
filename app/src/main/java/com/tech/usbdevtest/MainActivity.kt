@@ -111,12 +111,6 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(model_UsbCr.usbReceiver, filter)
         printResult("App start...\n\n")
         handleIntent(intent)
-        //btnClearLog.setOnClickListener {
-        //    btnClear_Click()
-        //}
-        //btnReadCard.setOnClickListener {
-        //    btnReadCard_Click()
-        //}
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -141,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         var msg = ""
 
         try {
-            //clear_info()
+            clear_info()
             resultView.text = ""
             if (model_UsbCr.model_initCardreader_Succeed == false) {
                 msg+=model_UsbCr.tracelog("EZ110PX Card Reader is null\n")
