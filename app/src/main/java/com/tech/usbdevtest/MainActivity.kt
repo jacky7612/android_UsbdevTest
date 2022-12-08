@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var model_UsbCr: UsbCardreader
     private          val MAX_LINES = 100
     private          var usb_prepare_succeed: Boolean = false
+    private          var model_count = 0
 
     /* UI elements */
     private lateinit var statusView: TextView
@@ -60,7 +61,35 @@ class MainActivity : AppCompatActivity() {
         Birthday.text   = ""
         Sex.text        = ""
     }
+    private fun Proc()
+    {
+        var msg = ""
 
+        try {
+            clear_info()
+            resultView.text = ""
+            if (model_UsbCr.model_initCardreader_Succeed == false) {
+                msg+=model_UsbCr.tracelog("EZ110PX Card Reader is null\n")
+                return
+            }
+            if (model_UsbCr.model_Plugin == true) {
+                msg+=model_UsbCr.tracelog(model_UsbCr.readHealthCardData())
+                cardID.text     = model_UsbCr.model_cardID
+                Name.text       = model_UsbCr.model_Name
+                Identity.text   = model_UsbCr.model_Identity
+                Birthday.text   = model_UsbCr.model_Birthday
+                Sex.text        = model_UsbCr.model_Sex
+            }
+        } catch (e: IllegalArgumentException) {
+            msg+=model_UsbCr.tracelog("btnReadCard :$e\n")
+        } finally {
+            if (model_UsbCr.model_Plugin)
+                msg+=model_UsbCr.tracelog("plugin = true\n")
+            else
+                msg+=model_UsbCr.tracelog("plugin = false\n")
+            printResult(msg)
+        }
+    }
     /**
      * Determine whether to list all devices or query a specific device from
      * the provided intent.
@@ -111,6 +140,22 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(model_UsbCr.usbReceiver, filter)
         printResult("App start...\n\n")
         handleIntent(intent)
+
+        var msg = ""
+        // 執行於Background Thread
+        Thread(Runnable {
+            while(true) {
+                Thread.sleep(500)
+                msg+=model_UsbCr.tracelog(model_UsbCr.detectCardreader())
+                //printResult(msg)
+                if (model_UsbCr.model_Plugin != model_UsbCr.model_PrevPlugin) {
+                    Proc()
+                    model_UsbCr.model_PrevPlugin = model_UsbCr.model_Plugin
+                }
+                //model_count++
+                //printResult("thread :" + model_count)
+            }
+        }).start()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -132,32 +177,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun btnReadCard_Click(view: View) {
-        var msg = ""
-
-        try {
-            clear_info()
-            resultView.text = ""
-            if (model_UsbCr.model_initCardreader_Succeed == false) {
-                msg+=model_UsbCr.tracelog("EZ110PX Card Reader is null\n")
-                return
-            }
-            msg+=model_UsbCr.tracelog(model_UsbCr.detectCardreader())
-            if (model_UsbCr.model_Plugin == true) {
-                msg+=model_UsbCr.tracelog(model_UsbCr.readHealthCardData())
-                cardID.text     = model_UsbCr.model_cardID
-                Name.text       = model_UsbCr.model_Name
-                Identity.text   = model_UsbCr.model_Identity
-                Birthday.text   = model_UsbCr.model_Birthday
-                Sex.text        = model_UsbCr.model_Sex
-            }
-        } catch (e: IllegalArgumentException) {
-            msg+=model_UsbCr.tracelog("btnReadCard :$e\n")
-        } finally {
-            if (model_UsbCr.model_Plugin)
-                msg+=model_UsbCr.tracelog("plugin = true\n")
-            else
-                msg+=model_UsbCr.tracelog("plugin = false\n")
-            printResult(msg)
-        }
+        Proc()
     }
 }

@@ -22,8 +22,9 @@ class UsbCardreader {
     public  lateinit var    model_Msg                   : String
     public  lateinit var    model_DeviceConnection      : UsbDeviceConnection
 
-    public  var             model_initCardreader_Succeed: Boolean = false
+    public  var             model_PrevPlugin            : Boolean = false
     public  var             model_Plugin                : Boolean = false
+    public  var             model_initCardreader_Succeed: Boolean = false
     public  lateinit var    model_Receiveytes           : ByteArray//接收資料
     public  var             model_cardID                : String = ""
     public  var             model_Name                  : String = ""
@@ -37,6 +38,7 @@ class UsbCardreader {
 
     fun UsbCardreader()
     {
+        model_PrevPlugin                = false
         model_initCardreader_Succeed    = false
         model_Plugin                    = false
         model_Msg                       = ""
@@ -360,6 +362,7 @@ class UsbCardreader {
         System.arraycopy(GetHealthIDCardCmd1, 0, spGetHealthIDCardCmd1, 10, GetHealthIDCardCmd1.size)
         //-------------------------
         msg = access_Usbdevice(model_DeviceConnection, spGetHealthIDCardCmd1)
+
         if (model_Receiveytes.get(0) == 0x80.toByte() && model_Receiveytes.get(7).toInt() == 0x42) {
             msg+=tracelog("No Card !\n")
             msg += tracelog("沒有插卡!\n")
