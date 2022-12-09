@@ -78,19 +78,19 @@ class MainActivity : AppCompatActivity() {
             }
             if (model_UsbCr.model_Plugin == true) {
                 msg+=model_UsbCr.tracelog(model_UsbCr.readHealthCardData())
-                cardID.text     = model_UsbCr.model_cardID
-                Name.text       = model_UsbCr.model_Name
-                Identity.text   = model_UsbCr.model_Identity
-                Birthday.text   = model_UsbCr.model_Birthday
-                Sex.text        = model_UsbCr.model_Sex
+                cardID.text     = "\t\t" + model_UsbCr.model_cardID
+                Name.text       = "\t\t" + model_UsbCr.model_Name
+                Identity.text   = "\t\t" + model_UsbCr.model_Identity
+                Birthday.text   = "\t\t" + model_UsbCr.model_Birthday
+                Sex.text        = "\t\t" + model_UsbCr.model_Sex
             }
         } catch (e: IllegalArgumentException) {
             msg+=model_UsbCr.tracelog("btnReadCard :$e\n")
         } finally {
             if (model_UsbCr.model_Plugin)
-                msg+=model_UsbCr.tracelog("plugin = true\n")
+                msg+=model_UsbCr.tracelog("偵測到卡片!\n")
             else
-                msg+=model_UsbCr.tracelog("plugin = false\n")
+                msg+=model_UsbCr.tracelog("請插入卡片!\n")
             printResult(msg)
         }
     }
@@ -150,6 +150,7 @@ class MainActivity : AppCompatActivity() {
         model_api = ApiInfo()
         model_webview.loadUrl(model_api.model_url)
         model_webview.isVisible = false
+        if (usb_prepare_succeed == false) return
         var msg = ""
         // 執行於Background Thread
         Thread(Runnable {
@@ -187,9 +188,5 @@ class MainActivity : AppCompatActivity() {
             resultView.text = ""
         } catch (e: Exception) {
         }
-    }
-
-    fun btnReadCard_Click(view: View) {
-        Proc()
     }
 }

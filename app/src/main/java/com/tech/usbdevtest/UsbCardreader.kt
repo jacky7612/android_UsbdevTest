@@ -280,8 +280,9 @@ class UsbCardreader {
     }
 
     public fun initCardreader(): Boolean {
+        var fRet = false
+        if (model_usbManager == null) return fRet;
         val deviceList = model_usbManager.getDeviceList()
-        var fRet       = false
 
         model_Msg += "* Detect card reader Entry <<<\n\n"
         try {

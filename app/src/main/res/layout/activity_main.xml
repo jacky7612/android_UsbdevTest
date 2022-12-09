@@ -15,17 +15,80 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dip"
+        android:layout_weight="4"
         android:orientation="vertical"
-        android:layout_weight="8">
-
+        android:layout_marginBottom="5dp"
+        >
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:scrollbars="vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:gravity="center_horizontal"
-            android:text="Log" />
+            android:background="#737373"
+            android:text="INFO" />
+
+        <TextView
+            android:id="@+id/info_cardID"
+            android:textColor="@color/black"
+            android:background="#cdcdcd"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp" />
+        <TextView
+            android:id="@+id/info_Name"
+            android:textColor="@color/black"
+            android:background="#cbb99d"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"/>
+        <TextView
+            android:id="@+id/info_Identity"
+            android:textColor="@color/black"
+            android:background="#cdcdcd"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"/>
+
+        <TextView
+            android:id="@+id/info_Birthday"
+            android:textColor="@color/black"
+            android:background="#cbb99d"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"/>
+        <TextView
+            android:id="@+id/info_Sex"
+            android:textColor="@color/black"
+            android:background="#cdcdcd"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:orientation="vertical"
+        android:layout_weight="8">
 
         <TextView
             android:id="@+id/st_status"
@@ -35,6 +98,7 @@
             android:layout_weight="1"
             android:gravity="center_horizontal"
             android:scrollbars="vertical"
+            android:background="#737373"
             android:text="status" />
 
         <TextView
@@ -63,75 +127,5 @@
 
     </LinearLayout>
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="4"
-        android:orientation="vertical"
-        >
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:gravity="center_horizontal"
-            android:text="INFO" />
-
-        <TextView
-            android:id="@+id/info_cardID"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="20dp" />
-        <TextView
-            android:id="@+id/info_Name"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="20dp"/>
-        <TextView
-            android:id="@+id/info_Identity"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="20dp"/>
-
-        <TextView
-            android:id="@+id/info_Birthday"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="20dp"/>
-        <TextView
-            android:id="@+id/info_Sex"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="20dp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="2"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btsend"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
-            android:onClick="btnReadCard_Click"
-            android:text="@string/btsend"
-            android:textSize="22sp" />
-
-    </LinearLayout>
 
 </LinearLayout>
