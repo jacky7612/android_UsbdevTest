@@ -10,6 +10,7 @@ import android.view.View
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 
@@ -83,6 +84,35 @@ class MainActivity : AppCompatActivity() {
                 Identity.text   = "\t\t" + model_UsbCr.model_Identity
                 Birthday.text   = "\t\t" + model_UsbCr.model_Birthday
                 Sex.text        = "\t\t" + model_UsbCr.model_Sex
+
+                // Y120446049 19690623
+                ApiConnect().reserveRegisterInquiry(
+                    "",
+                    "",
+                    model_UsbCr.model_Identity,
+                    model_UsbCr.model_Birthday,
+                    getSharedPreferences(ApiInfo.API_PARAMETRIC, MODE_PRIVATE)
+                        .getString(ApiInfo.MCode, ""),
+                    object : ApiConnect.resultListener {
+                        override fun onSuccess(message: String) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "onSuccess: $message", Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        override fun onFailure(task: String, message: String) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "$task: $message", Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                )
             }
         } catch (e: IllegalArgumentException) {
             msg+=model_UsbCr.tracelog("btnReadCard :$e\n")
@@ -120,6 +150,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        Thread.sleep(5000)
+        supportActionBar?.hide() // 隱藏標題欄
         usb_prepare_succeed = false
         statusView = findViewById(R.id.st_status)
         resultView = findViewById(R.id.st_response)
@@ -147,9 +179,8 @@ class MainActivity : AppCompatActivity() {
         printResult("App start...\n\n")
         handleIntent(intent)
 
-        model_api = ApiInfo()
-        model_webview.loadUrl(model_api.model_url)
-        model_webview.isVisible = false
+        model_webview.loadUrl(ApiInfo.URL)
+        model_webview.isVisible = true
         if (usb_prepare_succeed == false) return
         var msg = ""
         // 執行於Background Thread
@@ -161,7 +192,7 @@ class MainActivity : AppCompatActivity() {
                     Proc()
                     try {
                         if (model_webview.isVisible) {
-                            model_webview.loadUrl(model_api.model_url)
+                            model_webview.loadUrl(ApiInfo.URL)
                         }
                     } catch (e:Exception) {
 
